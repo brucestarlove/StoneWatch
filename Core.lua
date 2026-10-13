@@ -1,9 +1,12 @@
 local _, ns = ...
-ns.VERSION = "1.0.1"
+ns.VERSION = "1.0.2"
 ns.CREDIT = "Corwynn of <COZY> for inspiration & collaboration."
 ns.ICON = "Interface\\Icons\\INV_Stone_04"
 ns.roster, ns.units = {}, {}
-ns.defaults = {icons = true, badge = true, minimap = true, sound = false, chat = false, iconSize = 14, locked = true}
+ns.defaults = {
+    icons = true, badge = true, minimap = true, sound = false, chat = false, iconSize = 14, locked = true,
+    partyPosition = "outsideRight", partyX = 0, partyY = 0, raidPosition = "outsideRight", raidX = 0, raidY = 0,
+}
 
 function ns.Readable(value)
     return not (issecretvalue and issecretvalue(value))

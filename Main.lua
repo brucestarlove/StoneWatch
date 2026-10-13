@@ -8,6 +8,9 @@ local function initialize()
         if type(ns.db.options[key]) ~= type(value) then ns.db.options[key] = value end
     end
     ns.db.options.iconSize = math.max(10, math.min(24, math.floor(ns.db.options.iconSize + 0.5)))
+    for _, key in ipairs({"partyPosition", "raidPosition"}) do
+        if not ns.Frames.positions[ns.db.options[key]] then ns.db.options[key] = ns.defaults[key] end
+    end
     ns.db.minimapAngle = type(ns.db.minimapAngle) == "number" and ns.db.minimapAngle % 360 or 225
     ns.db.options.provider = nil
     ns.model = ns.Model.New(ns.db)
@@ -69,10 +72,10 @@ end
 for _, event in ipairs({
     "ADDON_LOADED", "PLAYER_ENTERING_WORLD", "GROUP_ROSTER_UPDATE", "PLAYER_REGEN_DISABLED",
     "PLAYER_REGEN_ENABLED", "ENCOUNTER_START", "ENCOUNTER_END", "BAG_UPDATE_DELAYED",
-    "PLAYER_TARGET_CHANGED", "PLAYER_FOCUS_CHANGED", "ITEM_DATA_LOAD_RESULT", "CVAR_UPDATE",
-    "TRADE_SHOW", "TRADE_UPDATE", "TRADE_PLAYER_ITEM_CHANGED", "TRADE_ACCEPT_UPDATE",
-    "TRADE_CLOSED", "TRADE_REQUEST_CANCEL", "UI_INFO_MESSAGE", "UI_ERROR_MESSAGE",
-    "DAMAGE_METER_COMBAT_SESSION_UPDATED", "DAMAGE_METER_CURRENT_SESSION_UPDATED", "DAMAGE_METER_RESET", "CHAT_MSG_ADDON",
+    "ITEM_DATA_LOAD_RESULT", "CVAR_UPDATE", "TRADE_SHOW", "TRADE_UPDATE",
+    "TRADE_PLAYER_ITEM_CHANGED", "TRADE_ACCEPT_UPDATE", "TRADE_CLOSED", "TRADE_REQUEST_CANCEL",
+    "UI_INFO_MESSAGE", "UI_ERROR_MESSAGE", "DAMAGE_METER_COMBAT_SESSION_UPDATED",
+    "DAMAGE_METER_CURRENT_SESSION_UPDATED", "DAMAGE_METER_RESET", "CHAT_MSG_ADDON",
 }) do ns.Register(frame, event) end
 
 frame:SetScript("OnEvent", function(_, event, ...)

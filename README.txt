@@ -1,4 +1,4 @@
-StoneWatch 1.0.1 - WoW Forever beta
+StoneWatch 1.0.2 - WoW Forever beta
 
 INSTALL
 Extract the StoneWatch folder into your Forever client's Interface/AddOns
@@ -13,7 +13,7 @@ a bright red outline and a white exclamation mark. A completed replacement
 trade restores the green icon and clears the outline and exclamation mark.
 Unknown players have no icon.
 
-Icons support Blizzard's target, focus, party, and raid frames. Your own
+Icons support Blizzard's party and raid frames. Your own
 character has no frame icon. The movable HUD shows Given and Used counts
 for current group members you or other StoneWatch users supplied. Given
 means no use detected since the latest refill; Used means a use was
@@ -40,6 +40,12 @@ button, lock or unlock the HUD, and enable sound or local chat notices.
 The page also has buttons for tracked players, scanning healing data,
 resetting the HUD position, clearing trades and history, restoring default
 settings, and showing tracking status. Settings are saved per character.
+
+Frame icons start outside the right edge of each frame, vertically centered.
+Party frames and raid frames each have their own position: outside any side
+of the frame, or inside on the health bar at a corner, an edge, or the
+center. Two sliders nudge the icon up to 30 pixels left or right and down
+or up.
 
 Left-click the minimap button for tracked players, right-click for options,
 or drag it around the minimap. Its position and visibility are saved.

@@ -2,6 +2,41 @@ local _, ns = ...
 local Frames = {overlays = setmetatable({}, {__mode = "k"}), pending = setmetatable({}, {__mode = "k"}), hooked = {}}
 ns.Frames = Frames
 
+-- Outside positions hang off the unit frame; inside ones sit on its health bar.
+Frames.positions = {
+    {key = "outsideRight", label = "Outside right", outside = true, point = "LEFT", to = "RIGHT", x = 2, y = 0},
+    {key = "outsideLeft", label = "Outside left", outside = true, point = "RIGHT", to = "LEFT", x = -2, y = 0},
+    {key = "outsideTop", label = "Outside top", outside = true, point = "BOTTOM", to = "TOP", x = 0, y = 2},
+    {key = "outsideBottom", label = "Outside bottom", outside = true, point = "TOP", to = "BOTTOM", x = 0, y = -2},
+    {key = "topLeft", label = "Inside top left", point = "TOPLEFT", to = "TOPLEFT", x = 2, y = -2},
+    {key = "top", label = "Inside top", point = "TOP", to = "TOP", x = 0, y = -2},
+    {key = "topRight", label = "Inside top right", point = "TOPRIGHT", to = "TOPRIGHT", x = -2, y = -2},
+    {key = "left", label = "Inside left", point = "LEFT", to = "LEFT", x = 2, y = 0},
+    {key = "center", label = "Inside center", point = "CENTER", to = "CENTER", x = 0, y = 0},
+    {key = "right", label = "Inside right", point = "RIGHT", to = "RIGHT", x = -2, y = 0},
+    {key = "bottomLeft", label = "Inside bottom left", point = "BOTTOMLEFT", to = "BOTTOMLEFT", x = 2, y = 2},
+    {key = "bottom", label = "Inside bottom", point = "BOTTOM", to = "BOTTOM", x = 0, y = 2},
+    {key = "bottomRight", label = "Inside bottom right", point = "BOTTOMRIGHT", to = "BOTTOMRIGHT", x = -2, y = 2},
+}
+for _, position in ipairs(Frames.positions) do Frames.positions[position.key] = position end
+
+local function layoutFor(unit)
+    return ns.Readable(unit) and type(unit) == "string" and unit:find("^raid") and "raid" or "party"
+end
+
+function Frames:Place(source, icon, layout)
+    local options = ns.db.options
+    local position = self.positions[options[layout .. "Position"]]
+    icon:ClearAllPoints()
+    icon:SetPoint(position.point, position.outside and source or icon.bar, position.to,
+        position.x + options[layout .. "X"], position.y + options[layout .. "Y"])
+    icon.layout = layout
+end
+
+function Frames:Relayout()
+    for _, icon in pairs(self.overlays) do icon.layout = nil end
+end
+
 function Frames:Add(source)
     if not source or not ns.Readable(source) or not source.GetObjectType then return end
     if source.IsForbidden and source:IsForbidden() then return end
@@ -14,8 +49,8 @@ function Frames:Add(source)
     icon:EnableMouse(false)
     local anchor = source.healthbar or source.healthBar
     if not anchor and source.HealthBarContainer then anchor = source.HealthBarContainer.HealthBar end
-    anchor = anchor or source
-    icon:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMRIGHT", -2, 2)
+    icon.bar = anchor or source
+    self:Place(source, icon, layoutFor(source.unit))
     icon.background = icon:CreateTexture(nil, "BACKGROUND")
     icon.background:SetAllPoints()
     icon.background:SetColorTexture(0.02, 0.025, 0.02, 0.95)
@@ -52,6 +87,8 @@ function Frames:Update(source, icon)
     local entry = ns.db.records[guid]
     local state = entry and entry.state
     if not state then icon:Hide(); return end
+    local layout = layoutFor(unit)
+    if icon.layout ~= layout and not InCombatLockdown() then self:Place(source, icon, layout) end
     local used = state == "used"
     icon.texture:SetDesaturated(used)
     icon.texture:SetVertexColor(used and 1 or 0.9, 1, used and 1 or 0.9)
@@ -64,9 +101,6 @@ end
 function Frames:Discover()
     if InCombatLockdown() then return end
     for source in pairs(self.pending) do self:Add(source) end
-    for _, name in ipairs({"TargetFrame", "FocusFrame", "TargetFrameToT", "FocusFrameToT"}) do
-        self:Add(_G[name])
-    end
     if PartyFrame and PartyFrame.PartyMemberFramePool then
         for source in PartyFrame.PartyMemberFramePool:EnumerateActive() do self:Add(source) end
     end
@@ -95,11 +129,9 @@ function Frames:InstallHooks()
     local function note(source)
         if ns.initialized and source and ns.Readable(source) then self.pending[source] = true end
     end
-    for _, name in ipairs({"CompactUnitFrame_SetUnit", "UnitFrame_SetUnit"}) do
-        if type(_G[name]) == "function" and not self.hooked[name] then
-            hooksecurefunc(name, note)
-            self.hooked[name] = true
-        end
+    if type(CompactUnitFrame_SetUnit) == "function" and not self.hooked.compact then
+        hooksecurefunc("CompactUnitFrame_SetUnit", note)
+        self.hooked.compact = true
     end
     if PartyMemberFrameMixin and type(PartyMemberFrameMixin.Setup) == "function" and not self.hooked.party then
         hooksecurefunc(PartyMemberFrameMixin, "Setup", note)
