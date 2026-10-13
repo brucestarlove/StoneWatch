@@ -28,8 +28,16 @@ function UI:Fill(tooltip, pinned)
     local quiet = colors.quiet
     tooltip:AddLine("StoneWatch", 0.5, 0.87, 0.63)
     local entries = sortedEntries()
-    for _, entry in ipairs(entries) do
+    local given, used = ns.model:Counts(ns.roster)
+    -- Past ten players, name only those who used a stone and count the rest.
+    local listed = #entries > 10 and math.min(used, 10) or #entries
+    for i = 1, listed do
+        local entry = entries[i]
         tooltip:AddDoubleLine(entry.name, entry.state == "used" and "Used" or "Given", 0.9, 0.9, 0.9, unpack(colors[entry.state]))
+    end
+    if listed < #entries then
+        if used > listed then tooltip:AddDoubleLine((used - listed) .. " more", "Used", 0.9, 0.9, 0.9, unpack(colors.used)) end
+        if given > 0 then tooltip:AddDoubleLine(given == 1 and "1 player" or given .. " players", "Given", 0.9, 0.9, 0.9, unpack(colors.given)) end
     end
     if #entries == 0 then tooltip:AddLine("Trade a healthstone to start tracking.", unpack(quiet)) end
     local ready, reason = ns.Tracking:MeterStatus()
