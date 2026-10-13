@@ -1,0 +1,12 @@
+# OS clutter
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# editors
+.vscode/
+.idea/
+*.swp
+
+# packager output
+.release/
