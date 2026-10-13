@@ -2,7 +2,7 @@
 ## Title: StoneWatch
 ## Notes: Healthstone trades, quiet group indicators, and notifications after combat for WoW Forever.
 ## Author: Lavitz Starlove
-## Version: 1.0.2
+## Version: 1.0.3
 ## X-Credits: Corwynn of <COZY> for inspiration & collaboration.
 ## SavedVariablesPerCharacter: StoneWatchDB
 ## OptionalDeps: Details

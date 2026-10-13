@@ -1,5 +1,5 @@
 local _, ns = ...
-ns.VERSION = "1.0.2"
+ns.VERSION = "1.0.3"
 ns.CREDIT = "Corwynn of <COZY> for inspiration & collaboration."
 ns.ICON = "Interface\\Icons\\INV_Stone_04"
 ns.roster, ns.units = {}, {}

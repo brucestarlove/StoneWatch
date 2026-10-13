@@ -1,4 +1,4 @@
-StoneWatch 1.0.2 - WoW Forever beta
+StoneWatch 1.0.3 - WoW Forever beta
 
 INSTALL
 Extract the StoneWatch folder into your Forever client's Interface/AddOns
@@ -17,7 +17,8 @@ Icons support Blizzard's party and raid frames. Your own
 character has no frame icon. The movable HUD shows Given and Used counts
 for current group members you or other StoneWatch users supplied. Given
 means no use detected since the latest refill; Used means a use was
-recorded. Hover for names or click for tracked players.
+recorded. Hover for names, left-click to keep the list open with recent
+uses, or right-click for options.
 Sound and local chat notices start disabled.
 
 AUTOMATIC SYNC

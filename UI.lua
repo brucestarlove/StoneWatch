@@ -1,7 +1,7 @@
 local _, ns = ...
 local UI = {}
 ns.UI = UI
-local colors = {given = {0.52, 0.87, 0.64}, used = {1, 0.3, 0.25}}
+local colors = {given = {0.52, 0.87, 0.64}, used = {1, 0.3, 0.25}, quiet = {0.55, 0.6, 0.56}}
 
 local function backdrop(frame)
     local texture = frame:CreateTexture(nil, "BACKGROUND")
@@ -22,28 +22,41 @@ local function sortedEntries()
     return entries
 end
 
-function UI:Tooltip(owner)
-    GameTooltip:SetOwner(owner, "ANCHOR_BOTTOMLEFT")
-    GameTooltip:AddLine("StoneWatch", 0.5, 0.87, 0.63)
-    GameTooltip:AddLine("Counts include your trades and refills shared by StoneWatch users.", 0.75, 0.78, 0.75, true)
-    GameTooltip:AddLine("Given: no use detected since the latest refill. Used: a use was recorded.", 0.75, 0.78, 0.75, true)
-    GameTooltip:AddLine("Refills from players without StoneWatch remain unknown.", 0.75, 0.78, 0.75, true)
-    for _, entry in ipairs(sortedEntries()) do
-        local color = colors[entry.state]
-        GameTooltip:AddDoubleLine(entry.name, entry.state == "used" and "Used" or "Supplied", 0.9, 0.9, 0.9, unpack(color))
+-- The hover tooltip and the pinned list show the same players; the pinned
+-- list adds recent uses in place of the click hints.
+function UI:Fill(tooltip, pinned)
+    local quiet = colors.quiet
+    tooltip:AddLine("StoneWatch", 0.5, 0.87, 0.63)
+    local entries = sortedEntries()
+    for _, entry in ipairs(entries) do
+        tooltip:AddDoubleLine(entry.name, entry.state == "used" and "Used" or "Given", 0.9, 0.9, 0.9, unpack(colors[entry.state]))
     end
-    GameTooltip:AddLine(" ")
-    GameTooltip:AddLine("Green: supplied. Desaturated with a red outline and !: used.", 0.75, 0.78, 0.75, true)
-    GameTooltip:AddLine("Group status updates after combat.", 0.75, 0.78, 0.75, true)
+    if #entries == 0 then tooltip:AddLine("Trade a healthstone to start tracking.", unpack(quiet)) end
     local ready, reason = ns.Tracking:MeterStatus()
     if not ready then
-        GameTooltip:AddLine(reason, 1, 0.55, 0.3, true)
+        tooltip:AddLine(reason, 1, 0.55, 0.3, true)
     elseif ns.pendingScan then
-        GameTooltip:AddLine(ns.scanReason or "Waiting for healing data.", 1, 0.75, 0.3, true)
+        tooltip:AddLine(ns.scanReason or "Waiting for healing data.", quiet[1], quiet[2], quiet[3], true)
     end
-    GameTooltip:AddLine("Click for tracked players. /sw options for settings.", 0.55, 0.6, 0.56, true)
-    GameTooltip:AddLine("/sw unlock to move the HUD; /sw reset to restore its position.", 0.55, 0.6, 0.56, true)
-    GameTooltip:Show()
+    if not pinned then
+        tooltip:AddLine("Left-click: keep open", unpack(quiet))
+        tooltip:AddLine("Right-click: options", unpack(quiet))
+    elseif #ns.db.history > 0 then
+        tooltip:AddLine(" ")
+        tooltip:AddLine("Recent uses", unpack(quiet))
+        for i = 1, math.min(5, #ns.db.history) do
+            local event = ns.db.history[i]
+            tooltip:AddDoubleLine(event.name, date("%H:%M", event.at), 0.9, 0.9, 0.9, unpack(quiet))
+        end
+    end
+    tooltip:Show()
+end
+
+function UI:Tooltip()
+    if self.panel:IsShown() then return end
+    GameTooltip:SetOwner(self.badge, "ANCHOR_NONE")
+    GameTooltip:SetPoint("TOP", self.badge, "BOTTOM", 0, -4)
+    self:Fill(GameTooltip)
 end
 
 function UI:Create()
@@ -52,6 +65,7 @@ function UI:Create()
     badge:SetFrameStrata("MEDIUM")
     badge:SetClampedToScreen(true)
     badge:SetMovable(true)
+    badge:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     badge:RegisterForDrag("LeftButton")
     local position = ns.db.position or {point = "TOP", relativePoint = "TOP", x = 0, y = -110}
     badge:SetPoint(position.point, UIParent, position.relativePoint, position.x, position.y)
@@ -66,9 +80,11 @@ function UI:Create()
     badge.text:SetPoint("LEFT", icon, "RIGHT", 5, 0)
     badge.text:SetPoint("RIGHT", -5, 0)
     badge.text:SetJustifyH("LEFT")
-    badge:SetScript("OnEnter", function() self:Tooltip(badge) end)
+    badge:SetScript("OnEnter", function() self:Tooltip() end)
     badge:SetScript("OnLeave", function() GameTooltip:Hide() end)
-    badge:SetScript("OnClick", function() self:Toggle() end)
+    badge:SetScript("OnClick", function(_, mouseButton)
+        if mouseButton == "RightButton" then ns.Options:Open() else self:Toggle() end
+    end)
     badge:SetScript("OnDragStart", function() if not ns.db.options.locked then badge:StartMoving() end end)
     badge:SetScript("OnDragStop", function()
         badge:StopMovingOrSizing()
@@ -77,48 +93,11 @@ function UI:Create()
     end)
     self.badge = badge
 
-    local panel = CreateFrame("Frame", "StoneWatchPanel", UIParent)
-    panel:SetSize(390, 474)
-    panel:SetPoint("CENTER")
-    panel:SetFrameStrata("DIALOG")
-    panel:SetMovable(true)
-    panel:SetClampedToScreen(true)
-    panel:EnableMouse(true)
-    panel:RegisterForDrag("LeftButton")
-    panel:SetScript("OnDragStart", panel.StartMoving)
-    panel:SetScript("OnDragStop", panel.StopMovingOrSizing)
-    backdrop(panel)
-    local title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    title:SetPoint("TOPLEFT", 16, -15)
-    title:SetText("StoneWatch")
-    local close = CreateFrame("Button", nil, panel, "UIPanelCloseButton")
-    close:SetPoint("TOPRIGHT")
-    close:SetScript("OnClick", function() panel:Hide() end)
-    panel.subtitle = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    panel.subtitle:SetPoint("TOPLEFT", 16, -43)
-    panel.subtitle:SetWidth(355)
-    panel.subtitle:SetJustifyH("LEFT")
-
-    local options = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-    options:SetSize(78, 22)
-    options:SetPoint("TOPRIGHT", -37, -13)
-    options:SetText("Options")
-    options:SetScript("OnClick", function() ns.Options:Open() end)
-    local scroll = CreateFrame("ScrollFrame", nil, panel, "UIPanelScrollFrameTemplate")
-    scroll:SetPoint("TOPLEFT", 16, -76)
-    scroll:SetPoint("BOTTOMRIGHT", -33, 52)
-    local content = CreateFrame("Frame", nil, scroll)
-    content:SetSize(334, 280)
-    scroll:SetScrollChild(content)
-    self.content, self.rows = content, {}
-    local footer = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    footer:SetPoint("BOTTOMLEFT", 16, 13)
-    footer:SetWidth(355)
-    footer:SetJustifyH("LEFT")
-    footer:SetText("Status updates after combat. Unknown players have no icon.\n/sw scan checks again; /sw clear clears tracked trades.")
+    -- A tooltip of its own, so the pinned list looks and sizes itself like the hover one.
+    local panel = CreateFrame("GameTooltip", "StoneWatchPanel", UIParent, "GameTooltipTemplate")
+    panel:SetFrameStrata("MEDIUM")
     panel:Hide()
     self.panel = panel
-    UISpecialFrames[#UISpecialFrames + 1] = "StoneWatchPanel"
 end
 
 function UI:Refresh()
@@ -130,40 +109,16 @@ function UI:Refresh()
     self.badge.text:SetText("Given " .. given .. "  |  Used " .. used)
     self.badge.text:SetTextColor(unpack((used > 0 or not meterEnabled) and colors.used or colors.given))
     if not self.panel:IsShown() then return end
-    self.panel.subtitle:SetText("Tracked group members: " .. given .. " given   |   " .. used .. " used")
-    local entries, lines = sortedEntries(), {}
-    lines[#lines + 1] = {text = "CURRENT GROUP", color = {0.5, 0.87, 0.63}}
-    if #entries == 0 then lines[#lines + 1] = {text = "Trade a healthstone to start tracking a player."} end
-    for _, entry in ipairs(entries) do
-        lines[#lines + 1] = {text = entry.name .. "  -  " .. (entry.state == "used" and "Used" or "Supplied"), color = colors[entry.state]}
-    end
-    lines[#lines + 1] = {text = ""}
-    lines[#lines + 1] = {text = "RECENT USES", color = {0.5, 0.87, 0.63}}
-    for i = 1, math.min(10, #ns.db.history) do
-        local event = ns.db.history[i]
-        lines[#lines + 1] = {text = date("%H:%M", event.at) .. "  " .. event.name}
-    end
-    if #ns.db.history == 0 then lines[#lines + 1] = {text = "Uses will appear here after a fight."} end
-    for i, line in ipairs(lines) do
-        local row = self.rows[i]
-        if not row then
-            row = self.content:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-            row:SetPoint("TOPLEFT", 0, -(i - 1) * 22)
-            row:SetWidth(334)
-            row:SetJustifyH("LEFT")
-            self.rows[i] = row
-        end
-        row:SetText(line.text)
-        row:SetTextColor(unpack(line.color or {0.86, 0.9, 0.86}))
-        row:Show()
-    end
-    for i = #lines + 1, #self.rows do self.rows[i]:Hide() end
-    self.content:SetHeight(math.max(280, #lines * 22))
+    self.panel:ClearLines()
+    self:Fill(self.panel, true)
 end
 
 function UI:Toggle()
-    self.panel:SetShown(not self.panel:IsShown())
-    self:Refresh()
+    if self.panel:IsShown() then self.panel:Hide(); return end
+    if GameTooltip:IsOwned(self.badge) then GameTooltip:Hide() end
+    self.panel:SetOwner(UIParent, "ANCHOR_NONE")
+    self.panel:SetPoint("TOP", self.badge, "BOTTOM", 0, -4)
+    self:Fill(self.panel, true)
 end
 
 function UI:ResetPosition()
