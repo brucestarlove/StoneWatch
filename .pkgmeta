@@ -1,0 +1,17 @@
+# Read by the BigWigs/CurseForge packager when building the addon zip.
+package-as: StoneWatch
+
+# Repository metadata and local development files never ship.
+ignore:
+  - .git
+  - .github
+  - .gitattributes
+  - .gitignore
+  - .pkgmeta
+  - .agents
+  - .codex
+  - .aws
+  - .env
+  - .release
+  - .vscode
+  - .idea

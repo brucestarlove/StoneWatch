@@ -91,4 +91,5 @@ Trades during an ongoing or combined session may miss that session's use.
 Trades survive /reload; a fresh login clears group stock assumptions.
 
 CREDITS
-Corwynn of <COZY> for inspiration & collaboration.
+Lavitz Starlove designer & developer.
+Corwynn for inspiration & collaboration.

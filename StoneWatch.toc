@@ -1,7 +1,8 @@
 ## Interface: 16001
 ## Title: StoneWatch
-## Notes: Healthstone trades, quiet group indicators, and notifications after combat for WoW Forever.
+## Notes: Healthstone trades, quiet group indicators, and notifications after combat for WoW Forever. Type /sw to open it.
 ## Author: Lavitz Starlove
+## IconTexture: Interface\Icons\INV_Stone_04
 ## Version: 1.0.4
 ## X-Credits: Corwynn of <COZY> for inspiration & collaboration.
 ## SavedVariablesPerCharacter: StoneWatchDB

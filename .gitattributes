@@ -1,1 +1,14 @@
 * text=auto eol=lf
+
+# Keep repository metadata and local development files out of source archives.
+/.github export-ignore
+/.pkgmeta export-ignore
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/.agents export-ignore
+/.codex export-ignore
+/.aws export-ignore
+/.env export-ignore
+/.release export-ignore
+/.vscode export-ignore
+/.idea export-ignore
