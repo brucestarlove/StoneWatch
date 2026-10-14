@@ -1,11 +1,25 @@
-StoneWatch 1.0.4 - WoW Forever beta
+# StoneWatch 1.0.5 - WoW Forever beta
 
-INSTALL
+Warlocks can see when a party or raid member uses a health stone/cookie/lock rock, to trade them a new one. The icons update and alert is shown when combat ends, since the API is restricted.
+
+Need either the Blizzard Damage Meters enabled, or Details addon.
+
+Options to anchor the icons around the unit frames in any way.
+
+Optional HUD for the Warlock to see # Given and # Used, and times when used.
+
+Requested, tested, and appreciated by my Warlock friends. Warriors will be healthier than ever.
+
+![StoneWatch screenshot](./StoneWatch-preview.png)
+
+## Install
+
 Extract the StoneWatch folder into your Forever client's Interface/AddOns
 folder, then restart WoW. Warlocks who want to share their refills need this
 updated version of StoneWatch. Healthstone recipients do not need it.
 
-USE
+## Using it
+
 Trade a healthstone to a party or raid member before a fight. A green stone
 icon means you or another StoneWatch user supplied them. After a matching
 use is recorded and the group leaves combat, the icon is desaturated with
@@ -22,7 +36,8 @@ uses, or right-click for options. With more than ten tracked players the
 list names those who used a stone and counts the rest.
 Sound and local chat notices start disabled.
 
-AUTOMATIC SYNC
+## Automatic sync with other warlocks
+
 StoneWatch users in the same party or raid automatically share confirmed
 healthstone trades and usage recorded after combat. There is no sync setting
 to configure and no visible party or raid chat spam. Records are exchanged
@@ -35,7 +50,8 @@ an old supplied snapshot cannot turn a used stone green again. Updates wait
 while combat or chat restrictions are active. /sw status shows sync status.
 Trades by players without this updated StoneWatch remain unknown.
 
-OPTIONS
+## Options
+
 Open Options -> AddOns -> StoneWatch, or use /sw options. Choose icon size
 from 10 to 24 pixels, show or hide frame icons, the HUD, and the minimap
 button, lock or unlock the HUD, and enable sound or local chat notices.
@@ -52,32 +68,21 @@ or up.
 Left-click the minimap button for tracked players, right-click for options,
 or drag it around the minimap. Its position and visibility are saved.
 
-DATA SOURCE
-StoneWatch automatically uses a compatible loaded version of Details;
-otherwise it uses Blizzard's damage meter. There is no source setting.
-With Details, the Blizzard meter window can stay hidden. Without Details,
-enable Blizzard's damage meter so it records healing. Both use Blizzard
-combat data in Forever and update after combat. /sw status shows the
-detected source.
+## Commands
 
-COMMANDS
-/sw                  Open tracked players and recent uses.
-/sw options          Open StoneWatch in Blizzard's Options menu.
-/sw unlock           Allow dragging the HUD; /sw lock locks it again.
-/sw reset            Restore the HUD's position.
-/sw size 18          Set icon size from 10 to 24.
-/sw scan             Check readable healing data again.
-/sw status           Show troubleshooting information.
-/sw clear            Clear local tracked trades and recent uses.
+| Command | What it does |
+| --- | --- |
+| /sw | Open tracked players and recent uses |
+| /sw options | Open StoneWatch in Blizzard's Options menu |
+| /sw unlock | Allow dragging the HUD; /sw lock locks it again |
+| /sw reset | Restore the HUD's position |
+| /sw size 18 | Set icon size from 10 to 24 |
+| /sw scan | Check readable healing data again |
+| /sw status | Show troubleshooting information |
+| /sw clear | Clear local tracked trades and recent uses |
 
-FIRST CHECK
-Trade a stone to a friend, have them use it while injured during a fight,
-then check their red outline and the recent-use list afterward. Trade a
-replacement and confirm the outline clears immediately and stays cleared
-after another scan. With two StoneWatch users grouped, have the second
-warlock supply a stone or replacement and check that both addons update.
+## Limits
 
-LIMITS
 Detection depends on recorded healthstone healing from the damage meter.
 Uses with no recorded healing may be missed. Group icons show the last
 observed state; the addon cannot inspect another player's inventory.
@@ -90,6 +95,16 @@ sessions are excluded so an earlier use cannot mark a replacement used.
 Trades during an ongoing or combined session may miss that session's use.
 Trades survive /reload; a fresh login clears group stock assumptions.
 
-CREDITS
+## Data Source
+
+StoneWatch automatically uses a compatible loaded version of Details;
+otherwise it uses Blizzard's damage meter. There is no source setting.
+With Details, the Blizzard meter window can stay hidden. Without Details,
+enable Blizzard's damage meter so it records healing. Both use Blizzard
+combat data in Forever and update after combat. /sw status shows the
+detected source.
+
+## Credits
+
 Lavitz Starlove designer & developer.
 Corwynn for inspiration & collaboration.
